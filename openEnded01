@@ -1,0 +1,81 @@
+#periodic signal
+import numpy as np
+import matplotlib.pyplot as plt
+n = np.arange(-3, 7)
+x = np.zeros(len(n))
+for i in range(len(n)):
+    if n[i] % 2 == 0:
+        x[i] = 3
+    else:
+        x[i] = 2
+plt.stem(n, x)
+plt.xlabel('n')
+plt.ylabel('x[n]')
+plt.title('Signal 1')
+plt.grid(True)
+plt.show()
+
+#Piecewise_Signal
+import numpy as np
+import matplotlib.pyplot as plt
+n = np.linspace(-3, 3, 1000)
+x = np.zeros_like(n)
+# x = -2 from -2 to -1
+x[(n >= -2) & (n <= -1)] = -2
+# Ramp from -1 to 1
+mask = (n >= -1) & (n <= 1)
+x[mask] = 2 * n[mask]
+# x = 2 from 1 to 2
+x[(n >= 1) & (n <= 2)] = 2
+plt.plot(n, x, linewidth=2)
+plt.axhline(0, color='black')
+plt.axvline(0, color='black')
+plt.xlim(-3, 3)
+plt.ylim(-3, 3)
+plt.xlabel('n')
+plt.ylabel('x[n]')
+plt.title('Signal 3')
+plt.grid(True)
+plt.show()
+
+#Staircase_Signal
+import numpy as np
+import matplotlib.pyplot as plt
+n = np.arange(0, 7)
+x = [1, 2, 3, 3, 2, 1, 0]
+plt.stem(n, x)
+plt.xlabel('n')
+plt.ylabel('x[n]')
+plt.title('Signal 2')
+plt.grid(True)
+plt.show()
+
+#x[n]=4u(n)−u(n−3)−5u(n−7)
+import numpy as np
+import matplotlib.pyplot as plt
+n = np.arange(-2, 12)
+u0 = (n >= 0).astype(int)
+u3 = (n >= 3).astype(int)
+u7 = (n >= 7).astype(int)
+x = 4*u0 - u3 - 5*u7
+plt.stem(n, x)
+plt.xlabel('n')
+plt.ylabel('x[n]')
+plt.title('x[n] = 4u(n) - u(n-3) - 5u(n-7)')
+plt.grid(True)
+plt.show()
+
+#. x[n]=δ(n)+3δ(n−1)+5δ(n+1)
+import numpy as np
+import matplotlib.pyplot as plt
+n = np.arange(-5, 6)
+x = np.zeros(len(n))
+x[n == -1] = 5
+x[n == 0] = 1
+x[n == 1] = 3
+plt.stem(n, x)
+plt.xlabel('n')
+plt.ylabel('x[n]')
+plt.title('x[n] = δ(n) + 3δ(n-1) + 5δ(n+1)')
+plt.grid(True)
+plt.show()
