@@ -1,0 +1,140 @@
+
+import os
+
+base_path = os.path.dirname(os.path.abspath(__file__))
+from pydub import AudioSegment
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import convolve
+import os
+
+# =====================================================
+# Inverse Filtering Function
+# =====================================================
+
+def inverse_filter(signal, kernel, epsilon=1e-5):
+
+    N = len(signal)
+
+    SIGNAL = np.fft.fft(signal, N)
+    KERNEL = np.fft.fft(kernel, N)
+
+    recovered = np.real(
+        np.fft.ifft(SIGNAL / (KERNEL + epsilon))
+    )
+
+    return recovered
+
+
+# =====================================================
+# Different Impulse Responses
+# =====================================================
+
+kernels = {
+
+    "Identity": np.array([1]),
+
+    "Echo":
+    np.array([1,0,0,0,0.5]),
+
+    "LowPass":
+    np.ones(5)/5,
+
+    "Smooth":
+    np.array([0.2,0.2,0.2,0.2,0.2])
+
+}
+
+
+# =====================================================
+# Song List
+# =====================================================
+songs = [
+    os.path.join(base_path, "song01.wav"),
+    os.path.join(base_path, "song02.wav"),
+    os.path.join(base_path, "song03.wav"),
+    os.path.join(base_path, "song04.wav"),
+    os.path.join(base_path, "song05.wav")
+]
+
+# =====================================================
+# Output Folder
+# =====================================================
+
+output_folder = os.path.join(base_path, "Output")
+os.makedirs(output_folder, exist_ok=True)
+
+
+# =====================================================
+# Processing
+# =====================================================
+
+for song in songs:
+
+    print("\nProcessing :",song)
+
+    audio = AudioSegment.from_wav(song)
+
+    audio = audio.set_channels(1)
+
+    samples = np.array(
+        audio.get_array_of_samples()
+    ).astype(np.float32)
+
+    samples = samples / np.max(np.abs(samples))
+
+    for name,kernel in kernels.items():
+
+        print("Kernel :",name)
+
+        # Convolution
+        convoluted = convolve(
+            samples,
+            kernel,
+            mode="same"
+        )
+
+        # Inverse Filtering
+        recovered = inverse_filter(
+            convoluted,
+            kernel
+        )
+
+        recovered = recovered / np.max(np.abs(recovered))
+
+        recovered_int16 = (
+            recovered * 32767
+        ).astype(np.int16)
+
+        output = AudioSegment(
+
+            recovered_int16.tobytes(),
+
+            frame_rate=audio.frame_rate,
+
+            sample_width=2,
+
+            channels=1
+
+        )
+
+        filename = os.path.splitext(os.path.basename(song))[0]
+
+        output_path = os.path.join(
+          output_folder,
+    f"{filename}_{name}.wav"
+)
+
+        output.export(output_path, format="wav")
+
+        plt.figure(figsize=(10,3))
+
+        plt.plot(recovered[:5000])
+
+        plt.title(f"{filename} - {name}")
+
+        plt.grid(True)
+
+        plt.show()
+
+print("\nExperiment Completed Successfully")
